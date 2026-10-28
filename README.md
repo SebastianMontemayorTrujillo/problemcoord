@@ -15,7 +15,7 @@ CDMX, 28 Oct 2026). Specs: `docs/`. Assistant guidance: `CLAUDE.md`.
 | S3 durable jobs + fake adapter (T03, T04) | implemented, tested |
 | S4 OpenRouter adapter (T06, T07) | implemented, mocked tests; live call not run (needs key + cap) |
 | S5 teacher review + export (T08) | implemented, tested; Classroom-style review screen |
-| S6 end-to-end + security (T09, T10) | planned |
+| S6 end-to-end + security (T09, T10) | implemented, tested (offline); deployment not started |
 
 ## Quick start (offline, fake adapter)
 ```bash

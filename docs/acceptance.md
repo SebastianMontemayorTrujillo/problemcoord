@@ -24,3 +24,21 @@
 
 Mathematical expectations are UNREVIEWED until a teacher signs off (manifest flag).
 Report each T as pass / fail / blocked / not run with command, timestamp and evidence location.
+
+## Evidence (2026-10-28T09:26Z, local, Python 3.14.4, Linux)
+Command: `.venv/bin/pytest -q` → **112 passed in 1.26s**, exit 0. All tests are offline; the hosted adapter is
+exercised only through a mocked transport.
+
+| Test | Status | Notes |
+|---|---|---|
+| T01–T05 | pass | contracts, intake, durable jobs, dedup, provenance |
+| T06 | pass | invalid JSON, unknown evidence IDs, no self-approval |
+| T07 | pass (mocked) | typed 429/5xx/timeout, token cap, unknown usage ≠ 0, fake/hosted parity |
+| T07 live | **not run** | needs `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `HWREVIEW_TOKEN_CAP` + approval |
+| T08 | pass | approval persists, exact latest version export, rerun not auto-approved |
+| T09 | pass | local-only, CSRF, traversal, no uploads/URL fetch, escaping, redacted logs |
+| T10 | pass | five fixtures over HTTP with restart: F1–F3 drafts, F4 needs review (no model call), F5 rejected |
+
+Manual: CLI smoke run and HTML review screen exercised on a throwaway data dir (approve → export
+→ draft again → v1 export refused). Mutation checks: disabling each guard fails at least one test.
+Fixture mathematical expectations remain **unreviewed by a teacher**.
