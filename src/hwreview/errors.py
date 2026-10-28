@@ -14,6 +14,7 @@ class ErrorCode(str, Enum):
     STALE_LEASE = "stale_lease"
     INVALID_TRANSITION = "invalid_transition"
     NOT_FOUND = "not_found"
+    BUDGET_EXCEEDED = "budget_exceeded"
 
     @property
     def retryable(self) -> bool:

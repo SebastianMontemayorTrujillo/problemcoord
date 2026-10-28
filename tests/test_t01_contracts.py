@@ -116,7 +116,7 @@ def test_enums_match_spec():
     assert set(c.Role.__args__) == {"submission", "reference"}
     assert {e.value for e in ErrorCode} == {
         "input_rejected", "extraction_uncertain", "timeout", "rate_limited", "provider_failure",
-        "invalid_json", "unknown_evidence_id", "stale_lease", "invalid_transition", "not_found",
+        "invalid_json", "unknown_evidence_id", "stale_lease", "invalid_transition", "not_found", "budget_exceeded",
     }
     assert {e.value for e in ErrorCode if e.retryable} == {
         "timeout", "rate_limited", "provider_failure", "invalid_json"}

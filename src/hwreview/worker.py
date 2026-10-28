@@ -23,6 +23,17 @@ class _Canceled(Exception):
     pass
 
 
+# No readable text at all: never ask a model to review nothing (it could only invent content).
+_EXTRACTION_GATE = c.ReviewDraft(
+    provider="system", model="extraction-gate", issues=[], uncertainty="high", needs_review=True,
+    suggested_feedback="No readable text was found in this submission. Review the original "
+                       "document; no draft feedback was generated.")
+
+
+def _readable(spans: list[c.EvidenceSpan]) -> bool:
+    return any(s.status == "ok" for s in spans)
+
+
 class Worker:
     def __init__(self, conn: sqlite3.Connection, store: BlobStore, adapter,
                  extractor: Extractor | None = None, limits: Limits = DEFAULT_LIMITS,
@@ -66,7 +77,7 @@ class Worker:
                                       submission_document_id=doc.document_id,
                                       submission_spans=spans, reference_spans=references,
                                       versions=job.versions)
-            raw = self.adapter.review(request)
+            raw = self.adapter.review(request) if _readable(spans) else _EXTRACTION_GATE
             self._checkpoint(claim)  # late output after cancellation is discarded here
             fields = build_result_fields(request, raw)
             result = self.queue.complete(job_id, token, fields)

@@ -78,6 +78,18 @@ output is discarded. A late result after cancellation is discarded.
 | stale_lease | no | token mismatch; output discarded |
 | invalid_transition | no | illegal state change |
 | not_found | no | unknown ID |
+| budget_exceeded | no | token cap unset or would be exceeded; no request is sent |
+
+## Extraction gate
+If a submission has **no** readable span, the worker does not call any model. It records a
+`needs_review` result with `provider: system`, `model: extraction-gate` and no issues.
+
+## Provider usage and budget
+Every hosted request writes a `provider_usage` row: reported `prompt_tokens`/`completion_tokens`
+(NULL when not reported — never 0) and `charged_tokens` counted against `token_cap`. Unknown usage,
+timeouts and 5xx are charged at the reserved bound (prompt estimate + `max_tokens`) because the
+provider may have run; 429/4xx are charged 0. A request is sent only if `used + estimate ≤ cap`.
+The hosted adapter refuses requests whose `prompt_version` differs from its own (`prompt:v1`).
 
 ## Deduplication
 - **Content:** `(assignment_id, role, sha256)` is unique; identical bytes in the same scope reuse

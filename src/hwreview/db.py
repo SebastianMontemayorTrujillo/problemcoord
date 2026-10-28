@@ -76,6 +76,16 @@ CREATE TABLE IF NOT EXISTS results (
     created_at     TEXT NOT NULL,
     PRIMARY KEY (result_id, result_version)
 );
+CREATE TABLE IF NOT EXISTS provider_usage (
+    id                 INTEGER PRIMARY KEY,
+    job_id             TEXT,
+    provider_config_id TEXT NOT NULL,
+    prompt_tokens      INTEGER,          -- NULL when the provider did not report it
+    completion_tokens  INTEGER,
+    charged_tokens     INTEGER NOT NULL, -- counted against the cap (reserved bound if unknown)
+    outcome            TEXT NOT NULL,
+    at                 TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS batch_items (
     batch_id         TEXT NOT NULL REFERENCES batches(batch_id),
     idx              INTEGER NOT NULL,

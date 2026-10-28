@@ -13,7 +13,7 @@ CDMX, 28 Oct 2026). Specs: `docs/`. Assistant guidance: `CLAUDE.md`.
 | S1 contracts + fixtures (T01) | implemented, tested |
 | S2 intake + extraction (T02, T05) | implemented, tested |
 | S3 durable jobs + fake adapter (T03, T04) | implemented, tested |
-| S4 OpenRouter adapter (T06, T07) | planned — needs key + token cap |
+| S4 OpenRouter adapter (T06, T07) | implemented, mocked tests; live call not run (needs key + cap) |
 | S5 teacher review + export (T08) | planned |
 | S6 end-to-end + security (T09, T10) | planned |
 
@@ -27,6 +27,12 @@ python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 .venv/bin/hwreview --data-dir /tmp/hwdemo batch show <batch_id>
 .venv/bin/hwreview --data-dir /tmp/hwdemo result show <result_id> --with-evidence
 ```
+
+## Live provider (optional, gated)
+Set these yourself in the shell (never commit them): `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`
+(a current `:free` model id from openrouter.ai/models) and `HWREVIEW_TOKEN_CAP` (total tokens).
+Then pass `--adapter openrouter` to `batch create` and `worker run`. Free endpoints may log
+prompts: synthetic data only.
 
 ## Known limits
 Text-layer PDFs only (no OCR); scans become `needs_review`. Single host, single worker, SQLite.

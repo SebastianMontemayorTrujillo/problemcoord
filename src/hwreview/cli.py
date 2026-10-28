@@ -3,19 +3,40 @@
 import argparse
 import json
 import logging
+import os
 import sys
 from dataclasses import asdict
 from pathlib import Path
 
 from hwreview import db
 from hwreview.adapters.fake import FakeAdapter
+from hwreview.adapters.openai_compat import OpenAICompatAdapter, TokenBudget
 from hwreview.batches import create_batch, load_manifest
+from hwreview.config import DEFAULT_LIMITS, Limits
 from hwreview.errors import HWError
 from hwreview.jobs import Queue
 from hwreview.storage import BlobStore
 from hwreview.worker import Worker
 
-ADAPTERS = {"fake": FakeAdapter}  # the hosted adapter is added in S4
+ADAPTER_CHOICES = ("fake", "openrouter")
+
+
+def _limits() -> Limits:
+    cap = os.environ.get("HWREVIEW_TOKEN_CAP")
+    return Limits(**{**DEFAULT_LIMITS.__dict__, "token_cap": int(cap) if cap else None})
+
+
+def make_adapter(name: str, conn, limits: Limits):
+    """Live provider settings come only from the environment; values are never printed."""
+    if name == "fake":
+        return FakeAdapter()
+    missing = [v for v in ("OPENROUTER_API_KEY", "OPENROUTER_MODEL", "HWREVIEW_TOKEN_CAP")
+               if not os.environ.get(v)]
+    if missing:
+        raise SystemExit(f"live provider gate: set {', '.join(missing)} (values are never printed)")
+    model = os.environ["OPENROUTER_MODEL"]
+    return OpenAICompatAdapter(model=model, api_key=os.environ.get("OPENROUTER_API_KEY"),
+                               budget=TokenBudget(conn, limits.token_cap), limits=limits)
 
 
 def _open(args):
@@ -29,7 +50,7 @@ def _print(obj) -> None:
 
 def cmd_batch_create(args):
     conn, store = _open(args)
-    adapter = ADAPTERS[args.adapter]()
+    adapter = make_adapter(args.adapter, conn, _limits())
     spec, refs, subs = load_manifest(Path(args.manifest))
     batch = create_batch(conn, store, spec, refs, subs, adapter.config_id)
     _print({"batch_id": batch.batch_id,
@@ -57,7 +78,8 @@ def cmd_batch_show(args):
 
 def cmd_worker_run(args):
     conn, store = _open(args)
-    worker = Worker(conn, store, ADAPTERS[args.adapter]())
+    limits = _limits()
+    worker = Worker(conn, store, make_adapter(args.adapter, conn, limits), limits=limits)
     if args.once:
         _print({"processed": worker.drain()})
     else:
@@ -102,7 +124,7 @@ def build_parser() -> argparse.ArgumentParser:
     batch = sub.add_parser("batch").add_subparsers(dest="cmd", required=True)
     b = batch.add_parser("create", help="create a batch from an approved manifest")
     b.add_argument("manifest")
-    b.add_argument("--adapter", choices=ADAPTERS, default="fake")
+    b.add_argument("--adapter", choices=ADAPTER_CHOICES, default="fake")
     b.set_defaults(fn=cmd_batch_create)
     b = batch.add_parser("show")
     b.add_argument("batch_id")
@@ -110,7 +132,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     worker = sub.add_parser("worker").add_subparsers(dest="cmd", required=True)
     w = worker.add_parser("run")
-    w.add_argument("--adapter", choices=ADAPTERS, default="fake")
+    w.add_argument("--adapter", choices=ADAPTER_CHOICES, default="fake")
     w.add_argument("--once", action="store_true", help="drain the queue and exit")
     w.add_argument("--poll", type=float, default=1.0)
     w.set_defaults(fn=cmd_worker_run)

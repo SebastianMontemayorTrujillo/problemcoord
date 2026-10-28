@@ -45,7 +45,7 @@ def test_fixture_batch_outcomes_and_f5_never_reaches_adapter(env, fixture_dir, c
     statuses = {i.name: i.status for i in batch.items}
     assert statuses["F5.pdf"] == "rejected" and len(job_ids(batch)) == 4
     worker.drain()
-    assert len(adapter.calls) == 4
+    assert len(adapter.calls) == 3  # F4 has no readable text: extraction gate, no model call
     states = {}
     for item in batch.items:
         if item.job_id:
