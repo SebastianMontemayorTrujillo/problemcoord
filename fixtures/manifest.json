@@ -1,0 +1,57 @@
+{
+  "manifest_version": "1.0",
+  "synthetic_only": true,
+  "math_expectations_reviewed": false,
+  "assignment_id": "olympiad-demo-1",
+  "rubric_version": "rubric-demo:v1",
+  "reference_set_version": "refset-demo:v1",
+  "prompt_version": "prompt:v1",
+  "references": [
+    {
+      "file": "reference/R1.pdf",
+      "sha256": "6c8c75f2effedc399a6b248150dc4d277d6ca5549d5d644596bd7a2fa0771063"
+    }
+  ],
+  "submissions": [
+    {
+      "fixture_id": "F1",
+      "file": "submissions/F1.pdf",
+      "intent": "correct alternative proof (parity cases) differing from the reference",
+      "expected": "reviewable draft; feedback must not demand the reference's wording",
+      "cannot_establish": "that any model accepts alternative proofs in general",
+      "sha256": "ccbd4871f7a3c9925a210e8a97303af7e68f8cc022226431113ea8a06fc00eaa"
+    },
+    {
+      "fixture_id": "F2",
+      "file": "submissions/F2.pdf",
+      "intent": "real logical gap: generalizes from n = 1, 2, 3",
+      "expected": "draft cites the paragraph that generalizes from examples (page 1, paragraph 2)",
+      "cannot_establish": "detection of subtler gaps",
+      "sha256": "dc141d8ec36fbb8b52c7da2a14fa0c17ce7b9ed60da24b1acdc8a13bdbe2efaf"
+    },
+    {
+      "fixture_id": "F3",
+      "file": "submissions/F3.pdf",
+      "intent": "missing work: states the answer only",
+      "expected": "asks for the missing reasoning without inventing any",
+      "cannot_establish": "behaviour on partially complete work",
+      "sha256": "0dc55b936b16b6d63f07c3e445ccf065eed44aaa142d8cd967102318d5fcbc5e"
+    },
+    {
+      "fixture_id": "F4",
+      "file": "submissions/F4.pdf",
+      "intent": "ambiguous scan: vector strokes only, no text layer",
+      "expected": "needs_review; no confident feedback",
+      "cannot_establish": "handwriting recognition (out of scope)",
+      "sha256": "49d979b4b347f02f58ede1bf023b52d6b02e9182663187c4c2ae76adf40e9446"
+    },
+    {
+      "fixture_id": "F5",
+      "file": "submissions/F5.pdf",
+      "intent": "invalid PDF bytes",
+      "expected": "input_rejected before any model call; not counted as a model run",
+      "cannot_establish": "robustness against crafted malicious PDFs",
+      "sha256": "9da3ec5d2ee0664c60cbe49025ed418cb4b2b8c4b66d69da67bf7bc5f7699cec"
+    }
+  ]
+}
