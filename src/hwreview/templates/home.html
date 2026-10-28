@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "_macros.html" import banner %}
+{% block tabs %}<a class="tabs__tab tabs__tab--active" href="/" aria-current="page">Classwork</a>{% endblock %}
+{% block content %}
+<main class="page">
+  {{ banner("Olympiad Training", "Grupo A, fall 2026") }}
+
+  <div class="classwork">
+    <aside class="classwork__side">
+      <div class="panel">
+        <h2 class="panel__title">Drafting</h2>
+        <p class="panel__text">Drafts are written by {{ provider_label }}. Nothing reaches a student until you approve it.</p>
+        {% if not with_worker %}<p class="panel__text panel__text--muted">The drafting worker runs separately: <code>hwreview worker run</code></p>{% endif %}
+      </div>
+    </aside>
+
+    <section class="classwork__list" aria-label="Assignments">
+      {% if can_run_demo %}
+      <form method="post" action="/demo/batch" class="classwork__create">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="btn btn--primary" type="submit">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+          Load demo submissions
+        </button>
+      </form>
+      {% endif %}
+
+      {% for a in assignments %}
+      <a class="assignment" href="/assignments/{{ a.id }}">
+        <span class="assignment__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm6 1.5V9h4.5L13 4.5ZM8 12v2h8v-2H8Zm0 4v2h5v-2H8Z"/></svg>
+        </span>
+        <span class="assignment__body">
+          <span class="assignment__title">Problem 1: n² + n is even</span>
+          <span class="assignment__meta">{{ a.id }}</span>
+        </span>
+        <span class="assignment__counts">
+          <span class="count"><b>{{ a.counts.to_review }}</b> to review</span>
+          <span class="count"><b>{{ a.counts.approved }}</b> approved</span>
+        </span>
+      </a>
+      {% else %}
+      <div class="empty">
+        <h2 class="empty__title">No submissions yet</h2>
+        <p>Load the demo submissions to draft feedback for five synthetic students.</p>
+      </div>
+      {% endfor %}
+    </section>
+  </div>
+</main>
+{% endblock %}

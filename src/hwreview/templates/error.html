@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="page page--narrow">
+  <div class="empty">
+    <h1 class="empty__title">{% if error.code.value == "not_found" %}This page does not exist{% else %}That action was not completed{% endif %}</h1>
+    <p>{{ error.message[:1].upper() ~ error.message[1:] }}.</p>
+    <p><a href="/">Back to the class</a></p>
+  </div>
+</main>
+{% endblock %}

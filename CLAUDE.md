@@ -34,6 +34,7 @@ If an instruction conflicts with the approved specs, stop and ask.
 - Setup: `python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'`
 - Fixtures: `.venv/bin/python fixtures/generate.py`
 - Tests: `.venv/bin/pytest -q` (single test: `.venv/bin/pytest -q tests/test_t03_jobs.py`)
+- Review screen: `.venv/bin/hwreview --data-dir /tmp/hwdemo serve --with-worker`
 - CLI: `.venv/bin/hwreview --help`
 
 ## Authorization (see claude_code_prompts.txt)

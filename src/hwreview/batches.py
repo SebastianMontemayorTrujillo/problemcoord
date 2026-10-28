@@ -25,6 +25,7 @@ class BatchSpec:
 @dataclass(frozen=True)
 class BatchItemView:
     name: str
+    display_name: str | None
     status: str  # accepted | rejected
     document_id: str | None = None
     job_id: str | None = None
@@ -57,7 +58,8 @@ def load_manifest(path: Path) -> tuple[BatchSpec, list[BatchItem], list[BatchIte
 
     def item(entry, role):
         f = _manifest_file(base, entry["file"])
-        return BatchItem(name=f.name, data=f.read_bytes(), role=role)
+        return BatchItem(name=f.name, data=f.read_bytes(), role=role,
+                         display_name=entry.get("display_name"))
 
     return (spec, [item(r, "reference") for r in m.get("references", [])],
             [item(s, "submission") for s in m["submissions"]])
@@ -87,19 +89,20 @@ def create_batch(conn: sqlite3.Connection, store: BlobStore, spec: BatchSpec,
     views = []
     for outcome in ingest_batch(conn, store, spec.assignment_id, submissions, limits):
         if outcome.status != "accepted":
-            views.append(BatchItemView(outcome.name, "rejected", error=outcome.error))
+            views.append(BatchItemView(outcome.name, outcome.display_name, "rejected", error=outcome.error))
             continue
         reuse = queue.find_reusable(outcome.document_id, versions)
         if reuse and reuse[0] == "result":
-            views.append(BatchItemView(outcome.name, "accepted", outcome.document_id,
-                                       reused_result_id=reuse[1]))
+            views.append(BatchItemView(outcome.name, outcome.display_name, "accepted",
+                                       outcome.document_id, reused_result_id=reuse[1]))
             continue
         job_id = reuse[1] if reuse else queue.enqueue(batch_id, outcome.document_id, versions)
-        views.append(BatchItemView(outcome.name, "accepted", outcome.document_id, job_id=job_id))
+        views.append(BatchItemView(outcome.name, outcome.display_name, "accepted",
+                                   outcome.document_id, job_id=job_id))
 
     with transaction(conn):
         conn.executemany(
-            "INSERT INTO batch_items VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [(batch_id, i, v.name, v.status, v.document_id, v.job_id, v.reused_result_id,
+            "INSERT INTO batch_items VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [(batch_id, i, v.name, v.display_name, v.status, v.document_id, v.job_id, v.reused_result_id,
               v.error and v.error.code, v.error and v.error.message) for i, v in enumerate(views)])
     return BatchView(batch_id, views)

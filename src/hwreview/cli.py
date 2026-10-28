@@ -115,6 +115,18 @@ def cmd_result_show(args):
     _print(out)
 
 
+def cmd_serve(args):
+    import uvicorn
+
+    from hwreview.api import create_app
+    conn, _ = _open(args)
+    limits = _limits()
+    adapter = make_adapter(args.adapter, conn, limits)
+    app = create_app(Path(args.data_dir), manifest_path=Path(args.manifest) if args.manifest else None,
+                     adapter=adapter, with_worker=args.with_worker)
+    uvicorn.run(app, host="127.0.0.1", port=args.port, log_level="warning")
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="hwreview", description=__doc__)
     p.add_argument("--data-dir", default="data", help="private data folder (default: ./data)")
@@ -149,6 +161,13 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--version", type=int)
     r.add_argument("--with-evidence", action="store_true")
     r.set_defaults(fn=cmd_result_show)
+    s = sub.add_parser("serve", help="teacher review screen on http://127.0.0.1:PORT (local-only)")
+    s.add_argument("--port", type=int, default=8000)
+    s.add_argument("--adapter", choices=ADAPTER_CHOICES, default="fake")
+    s.add_argument("--manifest", default="fixtures/manifest.json",
+                   help="allowlisted demo manifest for the 'Load demo submissions' button")
+    s.add_argument("--with-worker", action="store_true", help="run the drafting worker in-process")
+    s.set_defaults(fn=cmd_serve)
     return p
 
 

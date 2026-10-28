@@ -1,0 +1,21 @@
+{% macro banner(title, subtitle) -%}
+<section class="banner">
+  <div class="banner__text">
+    <h1 class="banner__title">{{ title }}</h1>
+    <p class="banner__subtitle">{{ subtitle }}</p>
+  </div>
+  {# n(n+1) dots with the staircase n(n+1)/2 shaded: two equal halves, so n^2 + n is even. #}
+  <svg class="banner__art" viewBox="0 0 196 166" role="img"
+       aria-label="A 5 by 6 grid of dots split into two equal staircases, showing that n(n+1) is twice a whole number">
+    {% for r in range(5) %}{% for col in range(6) %}
+    <circle cx="{{ 18 + col * 32 }}" cy="{{ 18 + r * 32 }}" r="11"
+            class="{{ 'dot dot--half' if col <= r else 'dot' }}"/>
+    {% endfor %}{% endfor %}
+    <path class="banner__stair" d="M34 2 V34 H66 V66 H98 V98 H130 V130 H162 V162"/>
+  </svg>
+</section>
+{%- endmacro %}
+
+{% macro chip(status, label) -%}
+<span class="chip chip--{{ status }}">{{ label }}</span>
+{%- endmacro %}

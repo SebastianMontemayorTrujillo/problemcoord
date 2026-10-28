@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "_macros.html" import chip %}
+{% block title %}Student work · Olympiad Training{% endblock %}
+{% block head %}{% if processing %}<meta http-equiv="refresh" content="2">{% endif %}{% endblock %}
+{% block tabs %}
+<a class="tabs__tab" href="/">Classwork</a>
+<a class="tabs__tab tabs__tab--active" href="/assignments/{{ assignment_id }}" aria-current="page">Student work</a>
+{% endblock %}
+{% block content %}
+<main class="page page--narrow">
+  <header class="work-head">
+    <div>
+      <h1 class="work-head__title">Problem 1: n² + n is even</h1>
+      <p class="work-head__meta">Prove that n² + n is even for every integer n.</p>
+    </div>
+    <dl class="tally">
+      <div class="tally__item"><dt>To review</dt><dd>{{ counts.to_review }}</dd></div>
+      <div class="tally__item"><dt>Approved</dt><dd>{{ counts.approved }}</dd></div>
+      <div class="tally__item"><dt>Other</dt><dd>{{ counts.other }}</dd></div>
+    </dl>
+  </header>
+
+  <ul class="roster" aria-label="Students">
+    {% for e in entries %}
+    <li class="roster__row">
+      <span class="avatar avatar--{{ loop.index0 % 6 }}" aria-hidden="true">{{ e.initial }}</span>
+      <span class="roster__who">
+        {% if e.result_id %}
+        <a class="roster__name" href="/review/{{ e.result_id }}/{{ e.version }}">{{ e.name }}</a>
+        {% else %}
+        <span class="roster__name">{{ e.name }}</span>
+        {% endif %}
+        <span class="roster__file">{{ e.file }}{% if e.version and e.version > 1 %}, draft {{ e.version }}{% endif %}</span>
+        {% if e.error %}<span class="roster__error">{{ e.error }}</span>{% endif %}
+      </span>
+      {% if e.issues %}<span class="roster__issues">{{ e.issues }} issue{{ 's' if e.issues != 1 }}</span>{% endif %}
+      {{ chip(e.status, "Drafting again" if e.rerunning else e.label) }}
+    </li>
+    {% endfor %}
+  </ul>
+  {% if processing and not with_worker %}
+  <p class="hint">Drafts appear when the worker runs: <code>hwreview worker run</code>. This page refreshes on its own.</p>
+  {% endif %}
+</main>
+{% endblock %}

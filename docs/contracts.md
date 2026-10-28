@@ -106,6 +106,9 @@ token cap: UNSET (blocks live calls).
 ## Interfaces
 Library and CLI in S1–S3: `hwreview batch create <manifest>`, `hwreview worker run [--once]`,
 `hwreview job show <id>`, `hwreview job cancel <id>`, `hwreview result show <id>`.
-HTTP (S5, proposed): `POST /batches`, `GET /jobs/{id}`, `POST /jobs/{id}/cancel`,
-`GET /results/{id}/{version}`, `POST /results/{id}/{version}/decision`,
-`GET /results/{id}/{version}/export`.
+HTTP (S5, implemented in `api.py`, local-only, CSRF header `X-CSRF-Token` on writes):
+`GET /api/jobs/{id}`, `POST /api/jobs/{id}/cancel`, `GET /api/results/{id}/{version}`,
+`POST /api/results/{id}/{version}/decision` (`{decision, edited_feedback}`),
+`GET /api/results/{id}/{version}/export`. No upload endpoint: batches come only from the
+allowlisted demo manifest (`POST /demo/batch`). Approving requires non-empty feedback.
+Review screen: `/`, `/assignments/{id}`, `/review/{result_id}/{version}`, `/documents/{id}/pdf`.

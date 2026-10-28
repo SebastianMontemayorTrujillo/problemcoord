@@ -23,11 +23,13 @@ class BatchItem:
     name: str  # display only; never used as a path
     data: bytes
     role: str
+    display_name: str | None = None  # synthetic student name, display only
 
 
 @dataclass(frozen=True)
 class ItemOutcome:
     name: str
+    display_name: str | None
     status: str  # accepted | rejected
     document_id: str | None = None
     reused_document: bool = False
@@ -122,7 +124,7 @@ def ingest_batch(conn: sqlite3.Connection, store: BlobStore, assignment_id: str,
                 raise _reject("batch page budget exceeded")
             doc, reused = ingest_document(conn, store, item.data, item.role, assignment_id, limits)
             pages_used += pages
-            outcomes.append(ItemOutcome(item.name, "accepted", doc.document_id, reused))
+            outcomes.append(ItemOutcome(item.name, item.display_name, "accepted", doc.document_id, reused))
         except HWError as e:
-            outcomes.append(ItemOutcome(item.name, "rejected", error=e.info()))
+            outcomes.append(ItemOutcome(item.name, item.display_name, "rejected", error=e.info()))
     return outcomes

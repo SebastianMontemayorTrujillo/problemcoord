@@ -86,10 +86,21 @@ CREATE TABLE IF NOT EXISTS provider_usage (
     outcome            TEXT NOT NULL,
     at                 TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS decisions (
+    id             INTEGER PRIMARY KEY,  -- append-only; the latest row per version wins
+    result_id      TEXT NOT NULL,
+    result_version INTEGER NOT NULL,
+    reviewer       TEXT NOT NULL,
+    decision       TEXT NOT NULL CHECK (decision IN ('approved', 'rejected')),
+    edited_feedback TEXT NOT NULL,
+    decided_at     TEXT NOT NULL,
+    FOREIGN KEY (result_id, result_version) REFERENCES results(result_id, result_version)
+);
 CREATE TABLE IF NOT EXISTS batch_items (
     batch_id         TEXT NOT NULL REFERENCES batches(batch_id),
     idx              INTEGER NOT NULL,
     name             TEXT NOT NULL,
+    display_name     TEXT,
     status           TEXT NOT NULL CHECK (status IN ('accepted', 'rejected')),
     document_id      TEXT,
     job_id           TEXT,
